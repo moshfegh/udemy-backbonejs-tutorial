@@ -28,7 +28,6 @@ var VehicleView = Backbone.View.extend({
     initialize: function(options){
         this.model.on("remove", this.onDeleteVehicle, this);
         this.bus = options.bus;
-
         this.bus.on("addRegisteredVehicle", this.onAddRegisteredVehicle, this);
     },
 
@@ -82,15 +81,15 @@ var VehiclesView = Backbone.View.extend({
         this.bus = options.bus;
     },
 
-    onAddVehicle: function(vehicle){
-        var vehicleView = new VehicleView({ model: vehicle });
+    // onAddVehicle: function(vehicle){
+    //     debugger;
+    //     var vehicleView = new VehicleView({ model: vehicle });
 
-        this.$el.append(vehicleView.render().$el);
-    },
+    //     this.$el.append(vehicleView.render().$el);
+    // },
 
     render: function(){
         var self = this;
-
         this.model.each(function(vehicle){
             var vehicleView = new VehicleView({ model: vehicle, bus: self.bus });
             self.$el.append(vehicleView.render().$el);
@@ -106,10 +105,10 @@ var hondas = new Vehicles([
     new Vehicle({ id: 3, vehicleMake: "Honda", vehicleModel: "CRV", registrationNumber: "XUV456", color: "Gray"})
 ]);
 
-var vehiclesView = new VehiclesView({ el: "#vehicleTemplate", model: hondas });
+var vehiclesView = new VehiclesView({ el: "#vehicleTemplate", model: hondas, bus:bus });
 vehiclesView.render();
 
-var newVehiclesView = new NewVehicleView({ el: "#addVehicleTemplate"});
+var newVehiclesView = new NewVehicleView({ el: "#addVehicleTemplate", bus: bus});
 newVehiclesView.render();
 
 
