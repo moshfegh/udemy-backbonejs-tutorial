@@ -25,14 +25,24 @@ var VehicleView = Backbone.View.extend({
         "click .deleteVehicle": "onDeleteVehicle"
     },
 
-    initialize: function(){
+    initialize: function(options){
         this.model.on("remove", this.onDeleteVehicle, this);
+        this.bus = options.bus;
+
+        this.bus.on("addRegisteredVehicle", this.onAddRegisteredVehicle, this);
     },
 
-    onDeleteVehicle: function(vehicle){
-        var id = this.$el.attr("id");
-        hondas.remove(hondas.get({id: id}));
-        this.$el.remove();
+    onDeleteVehicle: function(){
+        // var id = this.$el.attr("id");
+        // hondas.remove(hondas.get(id));
+        // this.$el.remove();
+        hondas.remove(this.model);
+        this.remove();
+    },
+
+    onAddRegisteredVehicle: function(vehicle){
+        this.model = vehicle;
+        this.render();
     },
 
     render: function(){
@@ -43,11 +53,33 @@ var VehicleView = Backbone.View.extend({
     }
 });
 
+var NewVehicleView = Backbone.View.extend({
+    events: {
+        "click #add-vehicle": "onAddNewVehicle"
+    },
+
+    initialize: function(options){
+        this.bus = options.bus;
+    },
+
+    onAddNewVehicle: function(){
+        var NewVehicleRegistration = $('#new-vehicle-registration').val();
+        var newHonda = new Vehicle({ registrationNumber: NewVehicleRegistration});
+        this.bus.trigger("addRegisteredVehicle", newHonda);
+    },
+
+    render: function(){
+        this.$el.html("<input id='new-vehicle-registration' type='text' placeholder='Registration Number' /><button id='add-vehicle'>Add Vehicle</button>");
+        return this;
+    }
+});
+
 var VehiclesView = Backbone.View.extend({
     tagName: "ul",
 
-    initialize: function(){
+    initialize: function(options){
         this.model.on("add", this.onAddVehicle, this);
+        this.bus = options.bus;
     },
 
     onAddVehicle: function(vehicle){
@@ -60,11 +92,13 @@ var VehiclesView = Backbone.View.extend({
         var self = this;
 
         this.model.each(function(vehicle){
-            var vehicleView = new VehicleView({ model: vehicle });
+            var vehicleView = new VehicleView({ model: vehicle, bus: self.bus });
             self.$el.append(vehicleView.render().$el);
         });
     }
 });
+
+bus = _.extend({}, Backbone.Events);
 
 var hondas = new Vehicles([
     new Vehicle({ id: 1, vehicleMake: "Honda", vehicleModel: "Accord", registrationNumber: "XLI887", color: "Blue"}),
@@ -74,6 +108,9 @@ var hondas = new Vehicles([
 
 var vehiclesView = new VehiclesView({ el: "#vehicleTemplate", model: hondas });
 vehiclesView.render();
+
+var newVehiclesView = new NewVehicleView({ el: "#addVehicleTemplate"});
+newVehiclesView.render();
 
 
 
